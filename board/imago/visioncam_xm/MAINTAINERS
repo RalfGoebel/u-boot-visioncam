@@ -1,0 +1,7 @@
+VISIONCAM_XM BOARD
+M:	Ralf Goebel <ralf.goebel@imago-technologies.com>
+S:	Maintained
+F:	board/imago/visioncam_xm/
+F:	include/configs/visioncam_xm.h
+F:	arch/arm/dts/am572x-visioncam-xm.dts
+F:	configs/am57xx_visioncam_xm_defconfig

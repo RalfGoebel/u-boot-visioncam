@@ -152,7 +152,7 @@ static void ft_hs_fixups(void *fdt, bd_t *bd)
 }
 #endif /* #ifdef CONFIG_TI_SECURE_DEVICE */
 
-#if defined(CONFIG_TARGET_DRA7XX_EVM) || defined(CONFIG_TARGET_AM57XX_EVM)
+#if defined(CONFIG_TARGET_DRA7XX_EVM) || defined(CONFIG_TARGET_AM57XX_EVM) || defined(CONFIG_TARGET_VISIONCAM_XM)
 #define OPP_DSP_CLK_NUM	3
 #define OPP_IVA_CLK_NUM	2
 #define OPP_GPU_CLK_NUM	2
