@@ -35,6 +35,12 @@ DECLARE_GLOBAL_DATA_PTR;
 #define OMAP3_MCSPI4_BASE	0x480BA000
 #endif
 
+#define OMAP4_MCSPI_REG_OFFSET 0x100
+
+struct omap2_mcspi_platform_config {
+        unsigned int regs_offset;
+};
+
 /* per-register bitmasks */
 #define OMAP3_MCSPI_SYSCONFIG_SMARTIDLE (2 << 3)
 #define OMAP3_MCSPI_SYSCONFIG_ENAWAKEUP BIT(2)
@@ -623,9 +629,12 @@ static int omap3_spi_probe(struct udevice *dev)
 	const void *blob = gd->fdt_blob;
 	int node = dev->of_offset;
 
-	priv->regs = (struct mcspi *)dev_get_addr(dev);
+	struct omap2_mcspi_platform_config* data =
+			(struct omap2_mcspi_platform_config*)dev_get_driver_data(dev);
+
+	priv->regs = (struct mcspi *)(dev_get_addr(dev) + data->regs_offset);
 	priv->pin_dir = fdtdec_get_uint(blob, node, "ti,pindir-d0-out-d1-in",
-					    MCSPI_PINDIR_D0_IN_D1_OUT);
+			MCSPI_PINDIR_D0_IN_D1_OUT);
 	priv->wordlen = SPI_DEFAULT_WORDLEN;
 	return 0;
 }
@@ -649,6 +658,14 @@ static int omap3_spi_set_mode(struct udevice *bus, uint mode)
 	return 0;
 }
 
+static struct omap2_mcspi_platform_config omap2_pdata = {
+        .regs_offset = 0,
+};
+
+static struct omap2_mcspi_platform_config omap4_pdata = {
+        .regs_offset = OMAP4_MCSPI_REG_OFFSET,
+};
+
 static const struct dm_spi_ops omap3_spi_ops = {
 	.claim_bus      = omap3_spi_claim_bus,
 	.release_bus    = omap3_spi_release_bus,
@@ -663,8 +680,8 @@ static const struct dm_spi_ops omap3_spi_ops = {
 };
 
 static const struct udevice_id omap3_spi_ids[] = {
-	{ .compatible = "ti,omap2-mcspi" },
-	{ .compatible = "ti,omap4-mcspi" },
+	{ .compatible = "ti,omap2-mcspi", .data = (ulong)&omap2_pdata },
+	{ .compatible = "ti,omap4-mcspi", .data = (ulong)&omap4_pdata },
 	{ }
 };
 

@@ -18,6 +18,9 @@ config TARGET_AM57XX_EVM
 	bool "AM57XX"
 	select TI_I2C_BOARD_DETECT
 
+config TARGET_VISIONCAM_XM
+	bool "IMAGO VisionCam XM"
+
 endchoice
 
 config SYS_SOC
@@ -27,8 +30,9 @@ source "board/compulab/cm_t54/Kconfig"
 source "board/ti/omap5_uevm/Kconfig"
 source "board/ti/dra7xx/Kconfig"
 source "board/ti/am57xx/Kconfig"
+source "board/imago/visioncam_xm/Kconfig"
 
-if TARGET_DRA7XX_EVM || TARGET_AM57XX_EVM
+if TARGET_DRA7XX_EVM || TARGET_AM57XX_EVM || TARGET_VISIONCAM_XM
 menu "Voltage Domain OPP selections"
 
 choice
