@@ -221,7 +221,7 @@ static int do_altera_config(cmd_tbl_t *cmdtp, int flag, int argc, char * const a
 	int result;
 	void *addr;
 	unsigned int size;
-	int pcie_x2 = 0;
+	int pcie_x2 = 1;	// Default: x2
 	
 	if (argc < 3) {
 		puts("missing arguments!\n");
@@ -229,8 +229,12 @@ static int do_altera_config(cmd_tbl_t *cmdtp, int flag, int argc, char * const a
 	}
 
 	if (argc > 3) {
-		if (strcmp(argv[3], "pcie_x2") == 0)
+		if (strcmp(argv[3], "pcie_x1") == 0)
+			pcie_x2 = 0;
+		else if (strcmp(argv[3], "pcie_x2") == 0)
 			pcie_x2 = 1;
+		else
+			return CMD_RET_USAGE;
 	}
 
 //	altera_power_on();
@@ -247,7 +251,7 @@ static int do_altera_config(cmd_tbl_t *cmdtp, int flag, int argc, char * const a
 U_BOOT_CMD(
 	fpga_init,	4,	0,	do_altera_config,
 	"Configure FPGA device",
-	"<address> <length> [pcie_x2]\n"
+	"<address> <length> [pcie_x1, pcie_x2]\n"
 );
 #if 0
 static int imago_fpga_probe(struct udevice *dev)
