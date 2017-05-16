@@ -254,32 +254,74 @@ struct vcores_data beagle_x15_volts = {
 /* No env to setup for SPL */
 static inline void setup_board_eeprom_env(void) { }
 
+
+#define GPIO_SD_SUPPLY	((3-1)*32 + 1)	// gpio3_1
+
 /* Override function to read eeprom information */
 void do_board_detect(void)
 {
+//	int rc;
 	u8 reg;
 
 	i2c_set_bus_num(0);
 
 //	i2c_probe(TPS65903X_CHIP_P1);
 
-	/* Read PMIC backup register 0, bit 0 */
-	palmas_i2c_read_u8(TPS65903X_CHIP_P1, 0x18, &reg);
-	if (reg & 1)
-	{
-		/* Cold-reset required, reset the flag first */
-		reg &= ~1;
-		palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0x18, reg);
+/*	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
+				  CONFIG_EEPROM_CHIP_ADDRESS);
+	if (rc)
+		printf("ti_i2c_eeprom_init failed %d\n", rc);*/
 
-		/* Restart device by writing a 1 to the SW_RST bit */
-		palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0xA0, 3);
-	}
-	else
+	// Workaround fuer Warmstart-Probleme mit der SD-Karte, welche ohne ein
+	// Power-Off nicht mehr in den UHS Modus schaltet.
+#if 1
+	// Ab Null-Serie: Versorgung der SD Karte kann ausgeschaltet werden
+	if (omap_revision() != DRA752_ES1_1)
 	{
-		/* next reboot requires a cold-reset, set the flag to 1 */
+		// SD I/O-Spannung abschalten:
+		palmas_i2c_read_u8(TPS65903X_CHIP_P1, 0x50, &reg);
+		reg &= ~1;
+		palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0x50, reg);
+
+		// SD Versorgung abschalten:
+		gpio_request(GPIO_SD_SUPPLY, "SD_ON");
+		gpio_direction_output(GPIO_SD_SUPPLY, 1);
+
+		// Warten, bis Spannung unter 0,5 V gesunken ist
+		udelay(300000);
+
+		// Spannungen wieder einschalten
+		gpio_set_value(GPIO_SD_SUPPLY, 0);
 		reg |= 1;
-		palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0x18, reg);
+		palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0x50, reg);
+		udelay(10000);
 	}
+#else
+	{
+        // PMIC Cold-Reset => Bootloader haengt danach manchmal
+        // siehe: https://e2e.ti.com/support/embedded/linux/f/354/t/532312
+
+        /* Read PMIC backup register 0, bit 0 */
+        palmas_i2c_read_u8(TPS65903X_CHIP_P1, 0x18, &reg);
+        if (reg & 1)
+        {
+            /* Cold-reset required, reset the flag first */
+            reg &= ~1;
+            palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0x18, reg);
+
+            /* Restart device by writing a 1 to the SW_RST bit */
+            palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0xA0, 3);
+
+            while (1);
+        }
+        else
+        {
+            /* next reboot requires a cold-reset, set the flag to 1 */
+            reg |= 1;
+            palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0x18, reg);
+        }
+	}
+#endif
 }
 
 #else	/* CONFIG_SPL_BUILD */
@@ -372,7 +414,8 @@ int board_late_init(void)
 
 	setup_board_eeprom_env();
 
-	// Beim Runterfahren wird DEV_CTRL.DEV_ON auf 0 gesetzt, POWERHOLD muss dazu ignoriert werden:
+	// Beim Runterfahren wird DEV_CTRL.DEV_ON auf 0 gesetzt, POWERHOLD
+	// muss dazu ignoriert werden (hat hoehere Prioritaet):
 
 	// DEV_CTRL.DEV_ON = 1
 	palmas_i2c_write_u8(TPS65903X_CHIP_P1, 0xA0, 0x1);
@@ -622,7 +665,7 @@ int board_fit_config_name_match(const char *name)
 }
 #endif
 
-#define GPIO_NOT100MBIT	260
+#define GPIO_NOT100MBIT	((8-1)*32 + 12)	// gpio8_12
 
 static void ft_set_thermal_trip(void *fdt, char *path, int temp)
 {
@@ -656,7 +699,6 @@ static int ft_mmc_fixup(void *fdt, bd_t *bd)
 		else {
 			printf("  => MMC: disabling UHS-104 mode in the Device Tree (advisory i843)\n");
 			fdt_delprop(fdt, offs, "sd-uhs-sdr104");
-
 			printf("  => MMC: updating pad delays in the Device Tree\n");
 			const char data[] = "default\0hs\0sdr12\0sdr25\0sdr50\0ddr50\0sdr104\0ddr50-rev20\0sdr104-rev20";
 			ret = fdt_setprop(fdt, offs, "pinctrl-names", data, sizeof(data));
@@ -676,7 +718,7 @@ static int ft_mmc_fixup(void *fdt, bd_t *bd)
 		ft_set_thermal_trip(fdt, "/thermal-zones/iva_thermal/trips/iva_crit", 90000);
 	}
 
-	gpio_request(GPIO_NOT100MBIT, "not100MBit");	// gpio8_12
+	gpio_request(GPIO_NOT100MBIT, "not100MBit");
 	if (gpio_get_value(GPIO_NOT100MBIT) == 0)
 	{
 		printf("NET: Detected 100Mbps connector, limiting PHY to 100Mbps in the Device Tree\n");
