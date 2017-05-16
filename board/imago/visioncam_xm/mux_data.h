@@ -67,6 +67,7 @@ const struct pad_conf_entry early_padconf[] = {
 	{UART2_RTSN, (M1 | PIN_INPUT_SLEW)},	/* uart2_rtsn.uart3_txd */
 	{I2C1_SDA, (PIN_INPUT_PULLUP | M0)},	/* I2C1_SDA */
 	{I2C1_SCL, (PIN_INPUT_PULLUP | M0)},	/* I2C1_SCL */
+	{VIN1A_FLD0, M14 | PIN_OUTPUT},	// GPIO3_1 => SD card supply
 };
 
 #ifdef CONFIG_IODELAY_RECALIBRATION
