@@ -99,6 +99,7 @@
 #define CONFIG_PHY_GIGE			/* per-board part of CPSW */
 #define CONFIG_PHYLIB
 #define PHY_ANEG_TIMEOUT	8000	/* PHY needs longer aneg time at 1G */
+#define CONFIG_LAST_STAGE_INIT	/* => last_stage_init() in board.c */
 
 /*#define CONFIG_SUPPORT_EMMC_BOOT*/
 
@@ -111,5 +112,11 @@
 #define CONFIG_RTC_MCP79411
 #define CONFIG_SYS_RTC_BUS_NUM 2
 #define CONFIG_SYS_I2C_RTC_ADDR 0x6f
+
+/* Memory test */
+#define CONFIG_CMD_MEMTEST
+#define CONFIG_SYS_ALT_MEMTEST	/* use more complex test */
+#define CONFIG_SYS_MEMTEST_START	0x80000000
+#define CONFIG_SYS_MEMTEST_END		0xbe000000
 
 #endif /* __CONFIG_VISIONCAM_XM_H */

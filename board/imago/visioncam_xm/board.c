@@ -333,6 +333,22 @@ void do_board_detect(void)
 
 }
 
+
+/**
+ * Loeschen der MAC Adresse in der Umgebung nach initr_net(),
+ * damit die MAC Adresse nach 'saveenv' nicht auf der SD-Karte landet.
+ */
+int last_stage_init(void)
+{
+	int repeatable;
+	unsigned long ticks;
+	char *argv[] = {"setenv", "ethaddr"};
+
+	cmd_process(0, 2, argv, &repeatable, &ticks);
+
+	return 0;
+}
+
 static void setup_board_eeprom_env(void)
 {
 	setenv("board_name", "visioncam_xm");
