@@ -40,6 +40,10 @@ int timer_init(void)
 	/* enable timer */
 	writel((CONFIG_SYS_PTV << 2) | TCLR_PRE | TCLR_AR | TCLR_ST,
 		&timer_base->tclr);
+#if V_SCLK >= 25000000  // freq (timer) >= freq (OCP)/4
+	// Use non-posted writes
+    writel(0x40, &timer_base->tscir);    // name should be isicr!
+#endif
 
 	return 0;
 }

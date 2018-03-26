@@ -1,0 +1,277 @@
+/*
+ * Copyright (C) 2014 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/* AM437x - IMAGO VisionCam UX */
+
+/dts-v1/;
+
+#include "am4372.dtsi"
+#include <dt-bindings/pinctrl/am43xx.h>
+#include <dt-bindings/pwm/pwm.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	model = "IMAGO VisionCam uX";
+	compatible = "ti,am437x-visioncam-ux";
+
+	chosen {
+		stdout-path = &uart0;
+		tick-timer = &timer2;
+	};
+
+	ocp {
+		u-boot,dm-spl;
+	};
+};
+
+&uart0 {
+	u-boot,dm-spl;
+};
+
+&am43xx_pinmux {
+	i2c0_pins: i2c0_pins {
+		pinctrl-single,pins = <
+			0x188 (PIN_INPUT | SLEWCTRL_FAST | MUX_MODE0)  /* i2c0_sda.i2c0_sda */
+			0x18c (PIN_INPUT | SLEWCTRL_FAST | MUX_MODE0)  /* i2c0_scl.i2c0_scl */
+		>;
+	};
+
+	mmc1_pins: pinmux_mmc1_pins {
+		pinctrl-single,pins = <
+			0x0f0 (PIN_INPUT | MUX_MODE0) /* mmc0_dat3.mmc0_dat3 */
+			0x0f4 (PIN_INPUT | MUX_MODE0) /* mmc0_dat2.mmc0_dat2 */
+			0x0f8 (PIN_INPUT | MUX_MODE0) /* mmc0_dat1.mmc0_dat1 */
+			0x0fc (PIN_INPUT | MUX_MODE0) /* mmc0_dat0.mmc0_dat0 */
+			0x100 (PIN_INPUT | MUX_MODE0) /* mmc0_clk.mmc0_clk */
+			0x104 (PIN_INPUT | MUX_MODE0) /* mmc0_cmd.mmc0_cmd */
+		>;
+	};
+
+	vpfe0_pins_default: vpfe0_pins_default {
+		pinctrl-single,pins = <
+			0x1b0 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_hd mode 0*/
+			0x1b4 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_vd mode 0*/
+			0x1c0 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_pclk mode 0*/
+			0x1c4 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data8 mode 0*/
+			0x1c8 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data9 mode 0*/
+			0x208 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data0 mode 0*/
+			0x20c (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data1 mode 0*/
+			0x210 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data2 mode 0*/
+			0x214 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data3 mode 0*/
+			0x218 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data4 mode 0*/
+			0x21c (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data5 mode 0*/
+			0x220 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data6 mode 0*/
+			0x224 (PIN_INPUT_PULLUP | MUX_MODE0)  /* cam0_data7 mode 0*/
+			0x270 (PIN_OUTPUT | MUX_MODE3)  /* xdma_event_intr0.clkout1 => SENSOR.CLK_IN */
+		>;
+	};
+
+	vpfe0_pins_sleep: vpfe0_pins_sleep {
+		pinctrl-single,pins = <
+			0x1b0 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x1b4 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x1c0 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x1c4 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x1c8 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x208 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x20c (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x210 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x214 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x218 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x21c (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x220 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+			0x224 (DS0_PULL_UP_DOWN_EN | INPUT_EN | MUX_MODE7)
+		>;
+	};
+
+	cpsw_default: cpsw_default {
+		pinctrl-single,pins = <
+			0x144 (PIN_INPUT | MUX_MODE0)	/* rmii1_ref_clk.rmii_refclk (50 MHz input clock)*/
+			0x10c (PIN_INPUT | MUX_MODE1)	/* mii1_crs.rmii_crs_dv */
+			0x110 (PIN_INPUT | MUX_MODE1)	/* mii1_rx_er.rmii1_rxer */
+			0x128 (PIN_OUTPUT | MUX_MODE1)	/* mii1_txd0.rmii1_txd0 */
+			0x124 (PIN_OUTPUT | MUX_MODE1)	/* mii1_txd1.rmii1_txd1 */
+			0x140 (PIN_INPUT | MUX_MODE1)	/* mii1_rxd0.rmii1_rxd0 */
+			0x13c (PIN_INPUT | MUX_MODE1)	/* mii1_rxd1.rmii1_rxd1 */
+			0x114 (PIN_OUTPUT | MUX_MODE1)	/* mii1_txen.rmii1_txen */
+		>;
+	};
+
+	cpsw_sleep: cpsw_sleep {
+		pinctrl-single,pins = <
+			0x144 (PIN_INPUT | MUX_MODE7)	/* rmii1_ref_clk.rmii_refclk (50 MHz input clock)*/
+			0x10c (PIN_INPUT | MUX_MODE7)
+			0x110 (PIN_INPUT | MUX_MODE7)
+			0x128 (PIN_OUTPUT | MUX_MODE7)
+			0x124 (PIN_OUTPUT | MUX_MODE7)
+			0x140 (PIN_INPUT | MUX_MODE7)
+			0x13c (PIN_INPUT | MUX_MODE7)
+			0x114 (PIN_OUTPUT | MUX_MODE7)
+		>;
+	};
+
+	davinci_mdio_default: davinci_mdio_default {
+		pinctrl-single,pins = <
+			/* MDIO */
+			0x148 (PIN_INPUT | SLEWCTRL_FAST | MUX_MODE0)	/* mdio_data.mdio_data */
+			0x14c (PIN_OUTPUT | MUX_MODE0)			/* mdio_clk.mdio_clk */
+		>;
+	};
+
+	davinci_mdio_sleep: davinci_mdio_sleep {
+		pinctrl-single,pins = <
+			/* MDIO reset value */
+			0x148 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			0x14c (PIN_INPUT_PULLDOWN | MUX_MODE7)
+		>;
+	};
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+	clock-frequency = <100000>;
+
+	tps@24 {
+		compatible = "ti,tps65218";
+		reg = <0x24>;
+		interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+
+		dcdc1: regulator-dcdc1 {
+			compatible = "ti,tps65218-dcdc1";
+			/* VDD_CORE limits min of OPP50 and max of OPP100 */
+			regulator-name = "vdd_core";
+			regulator-min-microvolt = <912000>;
+			regulator-max-microvolt = <1144000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc2: regulator-dcdc2 {
+			compatible = "ti,tps65218-dcdc2";
+			/* VDD_MPU limits min of OPP50 and max of OPP_NITRO */
+			regulator-name = "vdd_mpu";
+			regulator-min-microvolt = <912000>;
+			regulator-max-microvolt = <1378000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc3: regulator-dcdc3 {
+			compatible = "ti,tps65218-dcdc3";
+			regulator-name = "vdds_ddr";
+			regulator-min-microvolt = <1200000>;
+			regulator-max-microvolt = <1200000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc4: regulator-dcdc4 {
+			compatible = "ti,tps65218-dcdc4";
+			regulator-name = "v3_3d";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		ldo1: regulator-ldo1 {
+			compatible = "ti,tps65218-ldo1";
+			regulator-name = "v1_8d";
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		power-button {
+			compatible = "ti,tps65218-pwrbutton";
+			status = "okay";
+			interrupts = <3 IRQ_TYPE_EDGE_BOTH>;
+		};
+	};
+
+	at24@50 {
+		compatible = "at24,24c512";
+		pagesize = <64>;
+		reg = <0x50>;
+	};
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpio4 {
+	status = "okay";
+};
+
+&mmc1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc1_pins>;
+	vmmc-supply = <&dcdc4>;
+	bus-width = <4>;
+	u-boot,dm-spl;
+};
+
+
+&mac {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&cpsw_default>;
+	pinctrl-1 = <&cpsw_sleep>;
+	dual_emac = <1>;
+	status = "okay";
+};
+
+&davinci_mdio {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&davinci_mdio_default>;
+	pinctrl-1 = <&davinci_mdio_sleep>;
+	status = "okay";
+};
+
+&cpsw_emac0 {
+	phy_id = <&davinci_mdio>, <2>;
+	phy-mode = "rmii";
+};
+
+
+&rtc {
+	status = "okay";
+};
+
+&wdt {
+	status = "okay";
+};
+
+&cpu {
+	cpu0-supply = <&dcdc2>;
+};
+
+&vpfe0 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&vpfe0_pins_default>;
+	pinctrl-1 = <&vpfe0_pins_sleep>;
+
+	/* Camera port */
+	port {
+		vpfe0_ep: endpoint {
+			/* remote-endpoint = <&sensor>; add once we have it */
+			ti,am437x-vpfe-interface = <0>;
+			bus-width = <8>;
+			hsync-active = <1>;
+			vsync-active = <1>;
+		};
+	};
+};

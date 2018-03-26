@@ -154,7 +154,7 @@ void config_sdram_emif4d5(const struct emif_regs *regs, int nr)
 	} else {
 		/* DDR2 */
 		configure_mr(nr, 0);
-		configure_mr(nr, 1);
+//		configure_mr(nr, 1);
 	}
 }
 

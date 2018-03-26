@@ -1,0 +1,17 @@
+if TARGET_VISIONCAM_UX
+
+config SYS_BOARD
+	default "visioncam_ux"
+
+config SYS_VENDOR
+	default "imago"
+
+config SYS_SOC
+	default "am33xx"
+
+config SYS_CONFIG_NAME
+	default "visioncam_ux"
+
+# source "board/ti/common/Kconfig"
+
+endif

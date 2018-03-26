@@ -103,6 +103,10 @@ config SPL_RTC_ONLY_SUPPORT
 	help
 	  If you want RTC ONLY Support, say Y.
 
+choice
+	prompt "AM43xx board select"
+	optional
+
 config TARGET_AM43XX_EVM
 	bool "Support am43xx_evm"
 	select TI_I2C_BOARD_DETECT
@@ -113,6 +117,12 @@ config TARGET_AM43XX_EVM
 	  evaluation module system that enables developers
 	  to write software and develop hardware around
 	  an AM43xx processor subsystem.
+
+config TARGET_VISIONCAM_UX
+	bool "IMAGO VisionCam UX"
+
+endchoice
+
 endif
 
 if AM43XX || AM33XX

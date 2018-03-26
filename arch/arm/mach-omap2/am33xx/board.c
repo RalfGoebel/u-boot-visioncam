@@ -401,6 +401,9 @@ static void rtc_only(void)
 
 void s_init(void)
 {
+    // Enable DIV32K Module: PRCM_CM_WKUP_CLKDIV32K_CLKCTRL
+    *(u32 *)(CM_WKUP + 0x238) = 0x100;
+
 #if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_RTC_ONLY_SUPPORT)
 	rtc_only();
 #endif
