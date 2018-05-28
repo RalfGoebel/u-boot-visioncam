@@ -12,7 +12,7 @@
 #ifndef __CONFIG_VISIONCAM_XM_H
 #define __CONFIG_VISIONCAM_XM_H
 
-#define CONFIG_AM57XX
+#define CONFIG_DRA7XX
 
 #define CONFIG_IODELAY_RECALIBRATION
 
@@ -21,6 +21,10 @@
 #define CONFIG_BOARD_LATE_INIT
 
 #define CONFIG_NR_DRAM_BANKS		2
+
+#define CONFIG_SYS_MEMTEST_START    0x81000000
+#define CONFIG_SYS_MEMTEST_END      0xB8000000
+#define CONFIG_SYS_ALT_MEMTEST
 
 #define CONFIG_ENV_SIZE			(64 << 10)
 #define CONFIG_ENV_IS_IN_FAT
@@ -41,7 +45,7 @@
 	"uuid_disk=${uuid_gpt_disk};" \
 	"name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}"*/
 
-#undef CONFIG_OMAP3_SPI
+/*#undef CONFIG_OMAP3_SPI*/
 
 #include <configs/ti_omap5_common.h>
 
@@ -74,6 +78,10 @@
 	"run loadfpga; " \
 	"run mmcboot;" \
 	""
+
+#ifdef CONFIG_SPL_BUILD
+#undef CONFIG_CMD_BOOTD
+#endif
 
 /* Enhance our eMMC support / experience. */
 /*#define CONFIG_CMD_GPT

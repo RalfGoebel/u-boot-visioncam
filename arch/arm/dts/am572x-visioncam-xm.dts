@@ -14,11 +14,12 @@
 
 / {
 	model = "TI AM572x";
-	compatible = "ti,am5728-idk", "ti,am5728", "ti,dra742", "ti,dra74",
+	compatible = "ti,am5728", "ti,dra742", "ti,dra74",
 		     "ti,dra7";
 
 	chosen {
 		stdout-path = &uart3;
+		tick-timer = &timer2;
 		fpga-init-dev = &mcspi4;
 	};
 
@@ -40,7 +41,6 @@
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 	};
-
 };
 
 &dra7_pmx_core {
@@ -349,6 +349,34 @@
 	pinctrl-0 = <&uart3_pins_default>;
 };
 
+&gpio1 {
+	/delete-property/ u-boot,dm-spl;
+};
+
+&gpio2 {
+	/delete-property/ u-boot,dm-spl;
+};
+
+&gpio3 {
+	/delete-property/ u-boot,dm-spl;
+};
+
+&gpio4 {
+	/delete-property/ u-boot,dm-spl;
+};
+
+&gpio5 {
+	/delete-property/ u-boot,dm-spl;
+};
+
+&gpio6 {
+	/delete-property/ u-boot,dm-spl;
+};
+
+&gpio7 {
+	/delete-property/ u-boot,dm-spl;
+};
+
 &mac {
 	status = "okay";
 	pinctrl-names = "default", "sleep";
@@ -379,7 +407,13 @@
 	vmmc_aux-supply = <&vdd_3v3>;
 	pbias-supply = <&pbias_mmc_reg>;
 	bus-width = <4>;
-	cd-gpios = <&gpio6 27 GPIO_ACTIVE_LOW>; /* gpio 219 */
+/*	cd-gpios = <&gpio6 27 GPIO_ACTIVE_LOW>;*/ /* gpio 219 */
+
+	/delete-property/ sd-uhs-sdr104;
+	/delete-property/ sd-uhs-sdr50;
+	/delete-property/ sd-uhs-ddr50;
+	/delete-property/ sd-uhs-sdr25;
+	/delete-property/ sd-uhs-sdr12;
 };
 
 &mcspi4 {

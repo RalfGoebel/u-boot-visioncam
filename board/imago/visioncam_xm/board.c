@@ -24,24 +24,8 @@
 #include <environment.h>
 #include <rtc.h>
 
-//#include "board_detect.h"
 #include "altera.h"
 #include "mux_data.h"
-
-/*#define board_is_x15()		board_ti_is("BBRDX15_")
-#define board_is_x15_revb1()	(board_ti_is("BBRDX15_") && \
-				 (strncmp("B.10", board_ti_get_rev(), 3) <= 0))
-#define board_is_am572x_evm()	board_ti_is("AM572PM_")
-#define board_is_am572x_evm_reva3()	\
-				(board_ti_is("AM572PM_") && \
-				 (strncmp("A.30", board_ti_get_rev(), 3) <= 0))
-#define board_is_vcxm()	board_ti_is("VCXM")
-#define board_is_am572x_idk()	board_ti_is("AM572IDK")
-#define board_is_am571x_idk()	board_ti_is("AM571IDK")*/
-
-#if 0//def CONFIG_DRIVER_TI_CPSW
-#include <cpsw.h>
-#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -218,35 +202,47 @@ void emif_get_ext_phy_ctrl_const_regs(u32 emif_nr, const u32 **regs, u32 *size)
 }
 
 struct vcores_data beagle_x15_volts = {
-	.mpu.value		= VDD_MPU_DRA7,
-	.mpu.efuse.reg		= STD_FUSE_OPP_VMIN_MPU,
+	.mpu.value[OPP_NOM]	= VDD_MPU_DRA7_NOM,
+	.mpu.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_MPU_NOM,
 	.mpu.efuse.reg_bits     = DRA752_EFUSE_REGBITS,
 	.mpu.addr		= TPS659038_REG_ADDR_SMPS12,
 	.mpu.pmic		= &tps659038,
-	.mpu.abb_tx_done_mask = OMAP_ABB_MPU_TXDONE_MASK,
+	.mpu.abb_tx_done_mask	= OMAP_ABB_MPU_TXDONE_MASK,
 
-	.eve.value		= VDD_EVE_DRA7,
-	.eve.efuse.reg		= STD_FUSE_OPP_VMIN_DSPEVE,
+	.eve.value[OPP_NOM]	= VDD_EVE_DRA7_NOM,
+	.eve.value[OPP_OD]	= VDD_EVE_DRA7_OD,
+	.eve.value[OPP_HIGH]	= VDD_EVE_DRA7_HIGH,
+	.eve.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_DSPEVE_NOM,
+	.eve.efuse.reg[OPP_OD]	= STD_FUSE_OPP_VMIN_DSPEVE_OD,
+	.eve.efuse.reg[OPP_HIGH]	= STD_FUSE_OPP_VMIN_DSPEVE_HIGH,
 	.eve.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.eve.addr		= TPS659038_REG_ADDR_SMPS45,
 	.eve.pmic		= &tps659038,
 	.eve.abb_tx_done_mask	= OMAP_ABB_EVE_TXDONE_MASK,
 
-	.gpu.value		= VDD_GPU_DRA7,
-	.gpu.efuse.reg		= STD_FUSE_OPP_VMIN_GPU,
+	.gpu.value[OPP_NOM]	= VDD_GPU_DRA7_NOM,
+	.gpu.value[OPP_OD]	= VDD_GPU_DRA7_OD,
+	.gpu.value[OPP_HIGH]	= VDD_GPU_DRA7_HIGH,
+	.gpu.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_GPU_NOM,
+	.gpu.efuse.reg[OPP_OD]	= STD_FUSE_OPP_VMIN_GPU_OD,
+	.gpu.efuse.reg[OPP_HIGH]	= STD_FUSE_OPP_VMIN_GPU_HIGH,
 	.gpu.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.gpu.addr		= TPS659038_REG_ADDR_SMPS45,
 	.gpu.pmic		= &tps659038,
 	.gpu.abb_tx_done_mask	= OMAP_ABB_GPU_TXDONE_MASK,
 
-	.core.value		= VDD_CORE_DRA7,
-	.core.efuse.reg		= STD_FUSE_OPP_VMIN_CORE,
+	.core.value[OPP_NOM]	= VDD_CORE_DRA7_NOM,
+	.core.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_CORE_NOM,
 	.core.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.core.addr		= TPS659038_REG_ADDR_SMPS6,
 	.core.pmic		= &tps659038,
 
-	.iva.value		= VDD_IVA_DRA7,
-	.iva.efuse.reg		= STD_FUSE_OPP_VMIN_IVA,
+	.iva.value[OPP_NOM]	= VDD_IVA_DRA7_NOM,
+	.iva.value[OPP_OD]	= VDD_IVA_DRA7_OD,
+	.iva.value[OPP_HIGH]	= VDD_IVA_DRA7_HIGH,
+	.iva.efuse.reg[OPP_NOM]	= STD_FUSE_OPP_VMIN_IVA_NOM,
+	.iva.efuse.reg[OPP_OD]	= STD_FUSE_OPP_VMIN_IVA_OD,
+	.iva.efuse.reg[OPP_HIGH]	= STD_FUSE_OPP_VMIN_IVA_HIGH,
 	.iva.efuse.reg_bits	= DRA752_EFUSE_REGBITS,
 	.iva.addr		= TPS659038_REG_ADDR_SMPS45,
 	.iva.pmic		= &tps659038,
@@ -261,17 +257,11 @@ static inline void setup_board_eeprom_env(void) { }
 /* Override function to read eeprom information */
 void do_board_detect(void)
 {
-	int rc;
 	u8 reg;
 
 	i2c_set_bus_num(0);
 
 //	i2c_probe(TPS65903X_CHIP_P1);
-
-/*	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
-				  CONFIG_EEPROM_CHIP_ADDRESS);
-	if (rc)
-		printf("ti_i2c_eeprom_init failed %d\n", rc);*/
 
 	/* Read PMIC backup register 0, bit 0 */
 	palmas_i2c_read_u8(TPS65903X_CHIP_P1, 0x18, &reg);
@@ -310,19 +300,15 @@ static void setup_board_eeprom_env(void)
 
 #endif	/* CONFIG_SPL_BUILD */
 
-void vcores_update(void)
+void vcores_init(void)
 {
-/*	if (board_is_am572x_idk())
-		*omap_vcores = &am572x_idk_volts;
-	else if (board_is_am571x_idk())
-		*omap_vcores = &am571x_idk_volts;*/
+	*omap_vcores = &beagle_x15_volts;
 }
 
 void hw_data_init(void)
 {
 	*prcm = &dra7xx_prcm;
 	*dplls_data = &dra7xx_dplls;
-	*omap_vcores = &beagle_x15_volts;
 	*ctrl = &dra7xx_ctrl;
 }
 
@@ -332,66 +318,6 @@ int board_init(void)
 
 	return 0;
 }
-
-#if !defined(CONFIG_SPL_BUILD)
-static u64 mac_to_u64(u8 mac[6])
-{
-	int i;
-	u64 addr = 0;
-
-	for (i = 0; i < 6; i++) {
-		addr <<= 8;
-		addr |= mac[i];
-	}
-
-	return addr;
-}
-
-static void u64_to_mac(u64 addr, u8 mac[6])
-{
-	mac[5] = addr;
-	mac[4] = addr >> 8;
-	mac[3] = addr >> 16;
-	mac[2] = addr >> 24;
-	mac[1] = addr >> 32;
-	mac[0] = addr >> 40;
-}
-
-#if 0
-void board_set_ethaddr(void)
-{
-	uint8_t mac_addr[6];
-	int i;
-	u64 mac1, mac2;
-	u8 mac_addr1[6], mac_addr2[6];
-	int num_macs;
-	/*
-	 * Export any Ethernet MAC addresses from EEPROM.
-	 * On AM57xx the 2 MAC addresses define the address range
-	 */
-	board_ti_get_eth_mac_addr(0, mac_addr1);
-	board_ti_get_eth_mac_addr(1, mac_addr2);
-
-	if (is_valid_ethaddr(mac_addr1) && is_valid_ethaddr(mac_addr2)) {
-		mac1 = mac_to_u64(mac_addr1);
-		mac2 = mac_to_u64(mac_addr2);
-
-		/* must contain an address range */
-		num_macs = mac2 - mac1 + 1;
-		/* <= 50 to protect against user programming error */
-		if (num_macs > 0 && num_macs <= 50) {
-			for (i = 0; i < num_macs; i++) {
-				u64_to_mac(mac1 + i, mac_addr);
-				if (is_valid_ethaddr(mac_addr)) {
-					eth_setenv_enetaddr_by_index("eth",
-								     i + 2,
-								     mac_addr);
-				}
-			}
-		}
-	}
-}
-#endif
 
 /* RTC: fix problem with 32-Bit userspace programs after 2038.
  * see also: https://github.com/systemd/systemd/issues/1143 */
@@ -437,8 +363,6 @@ void fixup_rtc(void)
 
 	i2c_set_bus_num(old_bus);
 }
-
-#endif
 
 u32 optimize_vcore_voltage(struct volts const *v);
 
@@ -488,38 +412,10 @@ void recalibrate_iodelay(void)
 	int pconf_sz, iod_sz;
 	int ret;
 
-/*	if (board_is_vcxm()) */{
-		pconf = core_padconf_array_visioncam_xm;
-		pconf_sz = ARRAY_SIZE(core_padconf_array_visioncam_xm);
-		iod = iodelay_cfg_array_vcxm;
-		iod_sz = ARRAY_SIZE(iodelay_cfg_array_vcxm);
-	}
-#if 0
-	else if (board_is_am572x_idk()) {
-		pconf = core_padconf_array_essential_am572x_idk;
-		pconf_sz = ARRAY_SIZE(core_padconf_array_essential_am572x_idk);
-		iod = iodelay_cfg_array_am572x_idk;
-		iod_sz = ARRAY_SIZE(iodelay_cfg_array_am572x_idk);
-	} else if (board_is_am571x_idk()) {
-		pconf = core_padconf_array_essential_am571x_idk;
-		pconf_sz = ARRAY_SIZE(core_padconf_array_essential_am571x_idk);
-		iod = iodelay_cfg_array_am571x_idk;
-		iod_sz = ARRAY_SIZE(iodelay_cfg_array_am571x_idk);
-	} else {
-		/* Common for X15/GPEVM */
-		pconf = core_padconf_array_essential_x15;
-		pconf_sz = ARRAY_SIZE(core_padconf_array_essential_x15);
-		/* There never was an SR1.0 X15.. So.. */
-		if (omap_revision() == DRA752_ES1_1) {
-			iod = iodelay_cfg_array_x15_sr1_1;
-			iod_sz = ARRAY_SIZE(iodelay_cfg_array_x15_sr1_1);
-		} else {
-			/* Since full production should switch to SR2.0  */
-			iod = iodelay_cfg_array_x15_sr2_0;
-			iod_sz = ARRAY_SIZE(iodelay_cfg_array_x15_sr2_0);
-		}
-	}
-#endif
+	pconf = core_padconf_array_visioncam_xm;
+	pconf_sz = ARRAY_SIZE(core_padconf_array_visioncam_xm);
+	iod = iodelay_cfg_array_vcxm;
+	iod_sz = ARRAY_SIZE(iodelay_cfg_array_vcxm);
 
 	/* Setup I/O isolation */
 	ret = __recalibrate_iodelay_start();
