@@ -378,6 +378,44 @@ int board_init(void)
 	return 0;
 }
 
+void pru_enable_module(void)
+{
+    u32 * const clk_domains[1] = {0};
+    u32 * const clk_modules_explicit_en[2] = {(u32 *)0x44df8b20, 0};
+
+    // PRCM_RM_PER_RSTCTRL.PRU_ICSS_LRST = 0:
+    *(volatile unsigned int *)(0x44df0810) &= ~0x2;
+
+    // PRCM_CM_PER_PRU_ICSS_CLKCTRL.MODULEMODE = 0x2:
+    do_enable_clocks(clk_domains, clk_modules_explicit_en, 1);
+}
+
+/* PRU instruction array for clearing R30 */
+const uint32_t PRU_Reset_r30_image_0[] = {
+0x2eff819e,     // ZERO &R30, 4
+0x2a000000};    // HALT
+
+/* pru_clear_r30(): Clear PRU R30 register by loading a PRU program */
+void pru_clear_r30(unsigned int icss, unsigned int pru)
+{
+    unsigned int base = (icss == 0) ? 0x54440000 : 0x54400000;
+    unsigned int ctrl_base = base + ((pru == 0) ? 0x22000 : 0x24000);
+    unsigned int iram_base = base + ((pru == 0) ? 0x34000 : 0x38000);
+    int i;
+
+    writel(0, ctrl_base);   // SOFT_RST_N = 0, EN = 0
+
+    for (i=0; i < (sizeof(PRU_Reset_r30_image_0) / 4); i++)
+    {
+        writel(PRU_Reset_r30_image_0[i], iram_base + 4*i);
+    }
+
+    writel(0x2, ctrl_base);   // EN = 1
+
+    udelay(1000);
+    writel(0, ctrl_base);   // SOFT_RST_N = 0, EN = 0
+}
+
 #ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
@@ -391,6 +429,12 @@ int board_late_init(void)
 	if (get_device_type() == HS_DEVICE)
 		setenv("boot_fit", "1");
 #endif
+
+	// PRU register R30 (gpo) is uninitialized => clear R30
+	pru_enable_module();
+	pru_clear_r30(0, 0);
+    pru_clear_r30(0, 1);
+
 	return 0;
 }
 #endif
