@@ -1,9 +1,9 @@
 /*
  * board.c
  *
- * Board functions for IMAGO VisionCam UX
+ * Board functions for IMAGO VisionSensor PV
  *
- * Copyright (C) IMAGO Technologies GmbH - http://www.imago-technologies.com/
+ * Copyright (C) IMAGO Technologies GmbH <http://www.imago-technologies.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -570,7 +570,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 #ifdef CONFIG_SPL_LOAD_FIT
 int board_fit_config_name_match(const char *name)
 {
-	if (!strcmp(name, "am437x-visioncam-ux"))
+	if (!strcmp(name, "am437x-visionsensor-pv"))
 		return 0;
 	else
 		return -1;

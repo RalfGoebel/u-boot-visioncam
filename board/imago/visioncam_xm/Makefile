@@ -1,6 +1,6 @@
 #
-# (C) Copyright 2014
-# Texas Instruments, <www.ti.com>
+# (C) Copyright 2018
+# Imago Technologies GmbH <www.imago-technologies.com>
 #
 # SPDX-License-Identifier:	GPL-2.0+
 #

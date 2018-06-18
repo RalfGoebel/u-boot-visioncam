@@ -1,7 +1,6 @@
 #
-# Makefile
-#
-# Copyright (C) 2013 Texas Instruments Incorporated - http://www.ti.com/
+# (C) Copyright 2018
+# Imago Technologies GmbH <www.imago-technologies.com>
 #
 # SPDX-License-Identifier:	GPL-2.0+
 #

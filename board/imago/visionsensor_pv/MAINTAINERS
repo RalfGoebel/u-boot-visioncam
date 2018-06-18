@@ -1,0 +1,7 @@
+VISIONSENSOR_PV BOARD
+M:	Ralf Goebel <ralf.goebel@imago-technologies.com>
+S:	Maintained
+F:	board/imago/visionsensor_pv/
+F:	include/configs/visionsensor_pv.h
+F:	arch/arm/dts/am437x-visionsensor-pv.dts
+F:	configs/am43xx_visionsensor_pv_defconfig

@@ -1,13 +1,13 @@
 /*
- * visioncam_ux.h
+ * visionsensor_pv.h
  *
- * Copyright (C) IMAGO Technologies GmbH - http://www.imago-technologies.com/
+ * Copyright (C) IMAGO Technologies GmbH - <http://www.imago-technologies.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
-#ifndef __CONFIG_VISIONCAM_UX_H
-#define __CONFIG_VISIONCAM_UX_H
+#ifndef __CONFIG_VISIONSENSOR_PV_H
+#define __CONFIG_VISIONSENSOR_PV_H
 
 #define CONFIG_BOARD_LATE_INIT
 #define CONFIG_ARCH_CPU_INIT
@@ -159,4 +159,4 @@
 #define CONFIG_PRAM (64 * 1024)
 #endif /* CONFIG_TI_SECURE_DEVICE */
 
-#endif	/* __CONFIG_VISIONCAM_UX_H */
+#endif	/* __CONFIG_VISIONSENSOR_PV_H */

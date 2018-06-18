@@ -118,8 +118,8 @@ config TARGET_AM43XX_EVM
 	  to write software and develop hardware around
 	  an AM43xx processor subsystem.
 
-config TARGET_VISIONCAM_UX
-	bool "IMAGO VisionCam UX"
+config TARGET_VISIONSENSOR_PV
+	bool "IMAGO VisionSensor PV"
 
 endchoice
 

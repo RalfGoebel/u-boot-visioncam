@@ -1,9 +1,9 @@
 /*
  * board.c
  *
- * Board functions for IMAGO VisionCam UX
+ * Board functions for IMAGO VisionSensor PV
  *
- * Copyright (C) IMAGO Technologies GmbH - http://www.imago-technologies.com/
+ * Copyright (C) IMAGO Technologies GmbH - <http://www.imago-technologies.com>
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */

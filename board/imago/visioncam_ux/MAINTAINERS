@@ -1,7 +1,0 @@
-VISIONCAM_UX BOARD
-M:	Ralf Goebel <ralf.goebel@imago-technologies.com>
-S:	Maintained
-F:	board/imago/visioncam_ux/
-F:	include/configs/visioncam_ux.h
-F:	arch/arm/dts/am437x-visioncam-ux.dts
-F:	configs/am43xx_visioncam_ux_defconfig

@@ -1,7 +1,7 @@
-if TARGET_VISIONCAM_UX
+if TARGET_VISIONSENSOR_PV
 
 config SYS_BOARD
-	default "visioncam_ux"
+	default "visionsensor_pv"
 
 config SYS_VENDOR
 	default "imago"
@@ -10,8 +10,6 @@ config SYS_SOC
 	default "am33xx"
 
 config SYS_CONFIG_NAME
-	default "visioncam_ux"
-
-# source "board/ti/common/Kconfig"
+	default "visionsensor_pv"
 
 endif
