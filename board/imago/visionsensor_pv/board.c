@@ -390,9 +390,11 @@ void pru_enable_module(void)
     do_enable_clocks(clk_domains, clk_modules_explicit_en, 1);
 }
 
-/* PRU instruction array for clearing R30 */
+/* PRU instruction array for clearing R30 (gpo) */
 const uint32_t PRU_Reset_r30_image_0[] = {
-0x2eff819e,     // ZERO &R30, 4
+// 0x2eff819e,     // ZERO &R30, 4
+// Set OUT0 signal for PR0_PRU1 (low active), not used by PR0_PRU0:
+0x244000fe,     // LDI R30, 0x4000
 0x2a000000};    // HALT
 
 /* pru_clear_r30(): Clear PRU R30 register by loading a PRU program */
@@ -439,6 +441,7 @@ int board_late_init(void)
 }
 #endif
 
+#if 0
 /**
  * Loeschen der MAC Adresse in der Umgebung nach initr_net(),
  * damit die MAC Adresse nach 'saveenv' nicht auf der SD-Karte landet.
@@ -453,6 +456,7 @@ int last_stage_init(void)
 
     return 0;
 }
+#endif
 
 #ifndef CONFIG_DM_ETH
 #if (defined(CONFIG_DRIVER_TI_CPSW) && !defined(CONFIG_SPL_BUILD)) || \
@@ -529,9 +533,10 @@ int board_eth_init(bd_t *bis)
 	mac_addr[4] = mac_lo & 0xFF;
 	mac_addr[5] = (mac_lo & 0xFF00) >> 8;
 
-#if 0
+#if 1
 	// MAC Adresse in der Umgebung immer (er)setzen
-    eth_setenv_enetaddr("ethaddr", mac_addr);
+	if (is_valid_ethaddr(mac_addr))
+		eth_setenv_enetaddr("ethaddr", mac_addr);
 #else
 	if (!getenv("ethaddr")) {
 //		puts("<ethaddr> not set. Validating first E-fuse MAC, ");

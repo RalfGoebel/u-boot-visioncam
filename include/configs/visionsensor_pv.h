@@ -11,7 +11,7 @@
 
 #define CONFIG_BOARD_LATE_INIT
 #define CONFIG_ARCH_CPU_INIT
-#define CONFIG_LAST_STAGE_INIT  /* => last_stage_init() in board.c */
+/*#define CONFIG_LAST_STAGE_INIT*/  /* => last_stage_init() in board.c */
 
 #define CONFIG_MAX_RAM_BANK_SIZE	(512 << 20)	/* 512 MB */
 #define CONFIG_SYS_TIMERBASE		0x48040000	/* Use Timer2 */
