@@ -23,9 +23,12 @@
 #include <asm/arch/omap.h>
 #include <environment.h>
 #include <rtc.h>
+#include <miiphy.h>
 
 #include "altera.h"
 #include "mux_data.h"
+
+#define GPIO_NOT100MBIT	((8-1)*32 + 12)	// gpio8_12
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -333,22 +336,6 @@ void do_board_detect(void)
 
 }
 
-
-/**
- * Loeschen der MAC Adresse in der Umgebung nach initr_net(),
- * damit die MAC Adresse nach 'saveenv' nicht auf der SD-Karte landet.
- */
-int last_stage_init(void)
-{
-	int repeatable;
-	unsigned long ticks;
-	char *argv[] = {"setenv", "ethaddr"};
-
-	cmd_process(0, 2, argv, &repeatable, &ticks);
-
-	return 0;
-}
-
 static void setup_board_eeprom_env(void)
 {
 	setenv("board_name", "visioncam_xm");
@@ -424,6 +411,43 @@ void fixup_rtc(void)
 
 u32 optimize_vcore_voltage(struct volts const *v);
 
+#ifndef CONFIG_SPL_BUILD
+
+static void board_set_ethaddr(void)
+{
+	uint8_t mac_addr[6];
+	uint32_t mac_hi, mac_lo;
+
+	/* try reading mac address from efuse */
+	mac_lo = readl((*ctrl)->control_core_mac_id_0_lo);
+	mac_hi = readl((*ctrl)->control_core_mac_id_0_hi);
+	mac_addr[0] = (mac_hi & 0xFF0000) >> 16;
+	mac_addr[1] = (mac_hi & 0xFF00) >> 8;
+	mac_addr[2] = mac_hi & 0xFF;
+	mac_addr[3] = (mac_lo & 0xFF0000) >> 16;
+	mac_addr[4] = (mac_lo & 0xFF00) >> 8;
+	mac_addr[5] = mac_lo & 0xFF;
+
+	if (is_valid_ethaddr(mac_addr))
+		eth_setenv_enetaddr("ethaddr", mac_addr);
+}
+
+int board_phy_config(struct phy_device *phydev)
+{
+	gpio_request(GPIO_NOT100MBIT, "not100MBit");
+	if (gpio_get_value(GPIO_NOT100MBIT) == 0)
+	{
+		printf("100Mbps connector detected, limiting PHY to 100Mbps - ");
+
+		phy_write(phydev, 1, 9, 0);
+		phy_write(phydev, 1, 0, 0x1340);
+	}
+
+	return 0;
+}
+
+#endif
+
 int board_late_init(void)
 {
 	u8 reg;
@@ -448,7 +472,8 @@ int board_late_init(void)
 	printf("iva: %u mv => %u mv\n", (*omap_vcores)->iva.value, optimize_vcore_voltage(&(*omap_vcores)->iva));*/
 
 #if !defined(CONFIG_SPL_BUILD)
-//	board_set_ethaddr();
+	// MAC address: always use efuse, ignore environment variable 'ethaddr'
+	board_set_ethaddr();
 	fixup_rtc();
 #endif
 
@@ -473,8 +498,16 @@ void recalibrate_iodelay(void)
 
 	pconf = core_padconf_array_visioncam_xm;
 	pconf_sz = ARRAY_SIZE(core_padconf_array_visioncam_xm);
-	iod = iodelay_cfg_array_vcxm;
-	iod_sz = ARRAY_SIZE(iodelay_cfg_array_vcxm);
+	if (omap_revision() == DRA752_ES1_1)
+	{
+		iod = iodelay_cfg_array_vcxm_sr1_1;
+		iod_sz = ARRAY_SIZE(iodelay_cfg_array_vcxm_sr1_1);
+	}
+	else
+	{	// SR 2.0
+		iod = iodelay_cfg_array_vcxm_sr2_0;
+		iod_sz = ARRAY_SIZE(iodelay_cfg_array_vcxm_sr2_0);
+	}
 
 	/* Setup I/O isolation */
 	ret = __recalibrate_iodelay_start();
@@ -483,20 +516,6 @@ void recalibrate_iodelay(void)
 
 	/* Do the muxing here */
 	do_set_mux32((*ctrl)->control_padconf_core_base, pconf, pconf_sz);
-
-#if 0
-	/* Now do the weird minor deltas that should be safe */
-	if (board_is_x15() || board_is_am572x_evm()) {
-		if (board_is_x15_revb1() || board_is_am572x_evm_reva3()) {
-			pconf = core_padconf_array_delta_x15_sr2_0;
-			pconf_sz = ARRAY_SIZE(core_padconf_array_delta_x15_sr2_0);
-		} else {
-			pconf = core_padconf_array_delta_x15_sr1_1;
-			pconf_sz = ARRAY_SIZE(core_padconf_array_delta_x15_sr1_1);
-		}
-		do_set_mux32((*ctrl)->control_padconf_core_base, pconf, pconf_sz);
-	}
-#endif
 
 	/* Setup IOdelay configuration */
 	ret = do_set_iodelay((*ctrl)->iodelay_config_base, iod, iod_sz);
@@ -548,116 +567,6 @@ int spl_start_uboot(void)
 #endif
 
 
-#if 0 //def CONFIG_DRIVER_TI_CPSW
-
-/* Delay value to add to calibrated value */
-#define RGMII0_TXCTL_DLY_VAL		((0x3 << 5) + 0x8)
-#define RGMII0_TXD0_DLY_VAL		((0x3 << 5) + 0x8)
-#define RGMII0_TXD1_DLY_VAL		((0x3 << 5) + 0x2)
-#define RGMII0_TXD2_DLY_VAL		((0x4 << 5) + 0x0)
-#define RGMII0_TXD3_DLY_VAL		((0x4 << 5) + 0x0)
-#define VIN2A_D13_DLY_VAL		((0x3 << 5) + 0x8)
-#define VIN2A_D17_DLY_VAL		((0x3 << 5) + 0x8)
-#define VIN2A_D16_DLY_VAL		((0x3 << 5) + 0x2)
-#define VIN2A_D15_DLY_VAL		((0x4 << 5) + 0x0)
-#define VIN2A_D14_DLY_VAL		((0x4 << 5) + 0x0)
-
-static void cpsw_control(int enabled)
-{
-	/* VTP can be added here */
-}
-
-static struct cpsw_slave_data cpsw_slaves[] = {
-	{
-		.slave_reg_ofs	= 0x208,
-		.sliver_reg_ofs	= 0xd80,
-		.phy_addr	= 1,
-	},
-	{
-		.slave_reg_ofs	= 0x308,
-		.sliver_reg_ofs	= 0xdc0,
-		.phy_addr	= 2,
-	},
-};
-
-static struct cpsw_platform_data cpsw_data = {
-	.mdio_base		= CPSW_MDIO_BASE,
-	.cpsw_base		= CPSW_BASE,
-	.mdio_div		= 0xff,
-	.channels		= 8,
-	.cpdma_reg_ofs		= 0x800,
-	.slaves			= 1,
-	.slave_data		= cpsw_slaves,
-	.ale_reg_ofs		= 0xd00,
-	.ale_entries		= 1024,
-	.host_port_reg_ofs	= 0x108,
-	.hw_stats_reg_ofs	= 0x900,
-	.bd_ram_ofs		= 0x2000,
-	.mac_control		= (1 << 5),
-	.control		= cpsw_control,
-	.host_port_num		= 0,
-	.version		= CPSW_CTRL_VERSION_2,
-};
-
-int board_eth_init(bd_t *bis)
-{
-	int ret;
-	uint8_t mac_addr[6];
-	uint32_t mac_hi, mac_lo;
-	uint32_t ctrl_val;
-
-	puts("board_eth_init()\n");
-	while (1);
-
-	/* try reading mac address from efuse */
-	mac_lo = readl((*ctrl)->control_core_mac_id_0_lo);
-	mac_hi = readl((*ctrl)->control_core_mac_id_0_hi);
-	mac_addr[0] = (mac_hi & 0xFF0000) >> 16;
-	mac_addr[1] = (mac_hi & 0xFF00) >> 8;
-	mac_addr[2] = mac_hi & 0xFF;
-	mac_addr[3] = (mac_lo & 0xFF0000) >> 16;
-	mac_addr[4] = (mac_lo & 0xFF00) >> 8;
-	mac_addr[5] = mac_lo & 0xFF;
-
-	if (!getenv("ethaddr")) {
-		printf("<ethaddr> not set. Validating first E-fuse MAC\n");
-
-		if (is_valid_ethaddr(mac_addr))
-			eth_setenv_enetaddr("ethaddr", mac_addr);
-	}
-
-	mac_lo = readl((*ctrl)->control_core_mac_id_1_lo);
-	mac_hi = readl((*ctrl)->control_core_mac_id_1_hi);
-	mac_addr[0] = (mac_hi & 0xFF0000) >> 16;
-	mac_addr[1] = (mac_hi & 0xFF00) >> 8;
-	mac_addr[2] = mac_hi & 0xFF;
-	mac_addr[3] = (mac_lo & 0xFF0000) >> 16;
-	mac_addr[4] = (mac_lo & 0xFF00) >> 8;
-	mac_addr[5] = mac_lo & 0xFF;
-
-	if (!getenv("eth1addr")) {
-		if (is_valid_ethaddr(mac_addr))
-			eth_setenv_enetaddr("eth1addr", mac_addr);
-	}
-
-	ctrl_val = readl((*ctrl)->control_core_control_io1) & (~0x33);
-	ctrl_val |= 0x22;
-	writel(ctrl_val, (*ctrl)->control_core_control_io1);
-
-	/* The phy address for the AM57xx IDK are different than x15 */
-/*	if (board_is_am572x_idk() || board_is_am571x_idk()) {
-		cpsw_data.slave_data[0].phy_addr = 0;
-		cpsw_data.slave_data[1].phy_addr = 1;
-	}*/
-
-	ret = cpsw_register(&cpsw_data);
-	if (ret < 0)
-		printf("Error %d registering CPSW switch\n", ret);
-
-	return ret;
-}
-#endif
-
 int board_early_init_f(void)
 {
 	return 0;
@@ -680,8 +589,6 @@ int board_fit_config_name_match(const char *name)
 		return -1;
 }
 #endif
-
-#define GPIO_NOT100MBIT	((8-1)*32 + 12)	// gpio8_12
 
 static void ft_set_thermal_trip(void *fdt, char *path, int temp)
 {

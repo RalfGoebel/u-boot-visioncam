@@ -89,13 +89,13 @@
 #define CONFIG_BOOTP_SEND_HOSTNAME
 #define CONFIG_BOOTP_GATEWAY
 #define CONFIG_BOOTP_SUBNETMASK
+#define CONFIG_BOOTP_DHCP_REQUEST_DELAY	50000
 #define CONFIG_NET_RETRY_COUNT		10
 #define CONFIG_DRIVER_TI_CPSW		/* Driver for IP block */
 #define CONFIG_MII			/* Required in net/eth.c */
 #define CONFIG_PHY_GIGE			/* per-board part of CPSW */
 #define CONFIG_PHYLIB
 #define PHY_ANEG_TIMEOUT	8000	/* PHY needs longer aneg time at 1G */
-#define CONFIG_LAST_STAGE_INIT	/* => last_stage_init() in board.c */
 
 /*#define CONFIG_SUPPORT_EMMC_BOOT*/
 

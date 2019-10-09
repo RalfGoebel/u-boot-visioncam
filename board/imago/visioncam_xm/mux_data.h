@@ -72,7 +72,7 @@ const struct pad_conf_entry early_padconf[] = {
 
 #ifdef CONFIG_IODELAY_RECALIBRATION
 
-const struct iodelay_cfg_entry iodelay_cfg_array_vcxm[] = {
+const struct iodelay_cfg_entry iodelay_cfg_array_vcxm_sr1_1[] = {
 	{0x06F0, 480, 0},	/* CFG_RGMII0_RXC_IN */
 	{0x06FC, 111, 1641},	/* CFG_RGMII0_RXCTL_IN */
 	{0x0708, 272, 1116},	/* CFG_RGMII0_RXD0_IN */
@@ -87,6 +87,20 @@ const struct iodelay_cfg_entry iodelay_cfg_array_vcxm[] = {
 	{0x077C, 660, 120},	/* CFG_RGMII0_TXD3_OUT */
 };
 
+const struct iodelay_cfg_entry iodelay_cfg_array_vcxm_sr2_0[] = {
+	{0x06F0, 260, 0},	/* CFG_RGMII0_RXC_IN */
+	{0x06FC, 0, 1412},	/* CFG_RGMII0_RXCTL_IN */
+	{0x0708, 123, 1047},	/* CFG_RGMII0_RXD0_IN */
+	{0x0714, 139, 1081},	/* CFG_RGMII0_RXD1_IN */
+	{0x0720, 195, 1100},	/* CFG_RGMII0_RXD2_IN */
+	{0x072C, 239, 1216},	/* CFG_RGMII0_RXD3_IN */
+	{0x0740, 89, 0},	/* CFG_RGMII0_TXC_OUT */
+	{0x074C, 15, 125},	/* CFG_RGMII0_TXCTL_OUT */
+	{0x0758, 339, 162},	/* CFG_RGMII0_TXD0_OUT */
+	{0x0764, 146, 94},	/* CFG_RGMII0_TXD1_OUT */
+	{0x0770, 0, 27},	/* CFG_RGMII0_TXD2_OUT */
+	{0x077C, 291, 205},	/* CFG_RGMII0_TXD3_OUT */
+};
 
 #endif
 #endif /* _MUX_DATA_VCXM_H_ */
