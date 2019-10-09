@@ -84,11 +84,11 @@ const struct dpll_params dpll_per[NUM_CRYSTAL_FREQ] = {
 		{480, 12, 5, -1, -1, -1, -1}	/* 26 MHz */
 };
 
-const struct dpll_params epos_evm_dpll_ddr[NUM_CRYSTAL_FREQ] = {
+const struct dpll_params dpll_ddr[NUM_CRYSTAL_FREQ] = {
 		{665, 47, 1, -1, 4, -1, -1}, /*19.2*/
 		{133, 11, 1, -1, 4, -1, -1}, /* 24 MHz */
 		{266, 24, 1, -1, 4, -1, -1}, /* 25 MHz */
-		{133, 12, 1, -1, 4, -1, -1}  /* 26 MHz */
+		{266, 12, 2, -1, 8, -1, -1}  /* 26 MHz, 2019-08-19: increase ADPLLS frequency to avoid high clock jitter */
 };
 
 static const u32 ext_phy_ctrl_const_base_lpddr2[] = {
@@ -118,10 +118,10 @@ const struct ctrl_ioregs ioregs_lpddr2 = {
 	.cm0ioctl		= LPDDR2_ADDRCTRL_IOCTRL_VALUE,
 	.cm1ioctl		= LPDDR2_ADDRCTRL_WD0_IOCTRL_VALUE,
 	.cm2ioctl		= LPDDR2_ADDRCTRL_WD1_IOCTRL_VALUE,
-	.dt0ioctl		= LPDDR2_DATA0_IOCTRL_VALUE,
-	.dt1ioctl		= LPDDR2_DATA0_IOCTRL_VALUE,
-	.dt2ioctrl		= LPDDR2_DATA0_IOCTRL_VALUE,
-	.dt3ioctrl		= LPDDR2_DATA0_IOCTRL_VALUE,
+	.dt0ioctl		= 0x20000084, //2019-08-19: use fastest slew rate
+	.dt1ioctl		= 0x20000084,
+	.dt2ioctrl		= 0x20000084,
+	.dt3ioctrl		= 0x20000084,
 	.emif_sdram_config_ext	= 0x1,
 };
 
@@ -130,14 +130,14 @@ const struct emif_regs emif_regs_lpddr2 = {
 	.ref_ctrl			= 0x0000040D,		// t_REFI=3.9 us
 	.sdram_tim1			= 0xEA86B411,
 	.sdram_tim2			= 0x1025094A,
-	.sdram_tim3			= 0x0F6BA22F,
+	.sdram_tim3			= 0x5F6BA22F,		// 2019-08-19: T_PDLL_UL=5 according to SPRAC70A spreadsheet
 	.read_idle_ctrl			= 0x00050000,
-	.zq_config			= 0x50074BE4,
+	.zq_config			= 0x5007858C,		// 2019-08-19: ZQ_REFINTERVAL=858C according to SPRAC70A spreadsheet
 	.temp_alert_config		= 0x0,
 	.emif_rd_wr_lvl_rmp_win		= 0x0,
 	.emif_rd_wr_lvl_rmp_ctl		= 0x0,
 	.emif_rd_wr_lvl_ctl		= 0x0,
-	.emif_ddr_phy_ctlr_1		= 0x0E284006,
+	.emif_ddr_phy_ctlr_1		= 0x0E288006, // 2019-08-19: PHY_DLL_LOCK_DIFF=0x20 according to TRM
 	.emif_rd_wr_exec_thresh		= 0x80000405,
 	.emif_ddr_ext_phy_ctrl_1	= 0x04010040,
 	.emif_ddr_ext_phy_ctrl_2	= 0x00500050,
@@ -162,7 +162,7 @@ const struct dpll_params *get_dpll_ddr_params(void)
 {
 	int ind = get_sys_clk_index();
 
-	return &epos_evm_dpll_ddr[ind];
+	return &dpll_ddr[ind];
 }
 
 
