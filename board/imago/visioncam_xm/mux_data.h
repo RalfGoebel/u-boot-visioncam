@@ -57,8 +57,13 @@ const struct pad_conf_entry core_padconf_array_visioncam_xm[] = {
 	{MMC1_DAT3, (M0 | PIN_INPUT_PULLUP)},	/* mmc1_dat3.mmc1_dat3 */
 	{MMC1_SDCD, (M14 | PIN_INPUT_PULLUP)},	/* mmc1_sdcd.gpio6_27 */
 	{MMC1_SDWP, (M15 | PIN_OUTPUT)},	/* mmc1_sdwp.DriverOff */
+#if 1	// enable UART
 	{UART2_CTSN, (M2 | PIN_INPUT_SLEW)},	/* uart2_ctsn.uart3_rxd */
 	{UART2_RTSN, (M1 | PIN_INPUT_SLEW)},	/* uart2_rtsn.uart3_txd */
+#else	// disable UART if required by application
+	{UART2_CTSN, (M15 | PIN_INPUT_PULLUP)},
+	{UART2_RTSN, (M15 | PIN_INPUT_PULLUP)},
+#endif
 	{ON_OFF, (M1 | PIN_OUTPUT_PULLUP)},	/* on_off.on_off */
 };
 

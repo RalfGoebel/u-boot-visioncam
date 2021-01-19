@@ -49,10 +49,12 @@
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
 	DEFAULT_MMC_TI_ARGS \
+	"finduuid=part uuid mmc 0:2 uuid\0" \
 	"console=" CONSOLEDEV ",115200n8\0" \
+	"optargs=earlyprintk\0" \
 	"fdtfile=am572x-visioncam-xm.dtb\0" \
 	"bootpart=0:1\0" \
-	"bootdir=/boot\0" \
+	"bootfile=zImage\0" \
 	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
 	"mmcboot=mmc dev ${mmcdev}; " \
 		"if mmc rescan; then " \
