@@ -252,6 +252,33 @@ struct vcores_data beagle_x15_volts = {
 	.iva.abb_tx_done_mask	= OMAP_ABB_IVA_TXDONE_MASK,
 };
 
+int get_voltrail_opp(int rail_offset)
+{
+	int opp;
+
+	switch (rail_offset) {
+	case VOLT_MPU:
+		opp = DRA7_MPU_OPP;
+		break;
+	case VOLT_CORE:
+		opp = DRA7_CORE_OPP;
+		break;
+	case VOLT_GPU:
+		opp = DRA7_GPU_OPP;
+		break;
+	case VOLT_EVE:
+		opp = DRA7_DSPEVE_OPP;
+		break;
+	case VOLT_IVA:
+		opp = DRA7_IVA_OPP;
+		break;
+	default:
+		opp = OPP_NOM;
+	}
+
+	return opp;
+}
+
 
 #ifdef CONFIG_SPL_BUILD
 /* No env to setup for SPL */
