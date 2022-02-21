@@ -51,11 +51,19 @@
 	DEFAULT_MMC_TI_ARGS \
 	"finduuid=part uuid mmc 0:2 uuid\0" \
 	"console=" CONSOLEDEV ",115200n8\0" \
-	"optargs=earlyprintk\0" \
 	"fdtfile=am572x-visioncam-xm.dtb\0" \
 	"bootpart=0:1\0" \
 	"bootfile=zImage\0" \
+	"initrd_file=initrd.img\0" \
 	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
+	"loadinitrd=if test -n ${initrd_file}; then if test -e mmc ${bootpart} ${initrd_file}; then " \
+			"load mmc ${bootpart} ${rdaddr} ${initrd_file}; " \
+		"fi; fi;\0" \
+	"args_mmc=run finduuid;setenv bootargs console=${console} " \
+		"${optargs} " \
+		"root=PARTUUID=${uuid} rw " \
+		"rootfstype=${mmcrootfstype} " \
+		"fsck.repair=yes earlyprintk quiet\0" \
 	"mmcboot=mmc dev ${mmcdev}; " \
 		"if mmc rescan; then " \
 			"echo SD/MMC found on device ${mmcdev};" \
@@ -63,7 +71,8 @@
 				"run loadfdt; " \
 				"echo Booting from mmc${mmcdev} ...; " \
 				"run args_mmc; " \
-				"bootz ${loadaddr} - ${fdtaddr}; " \
+				"if run loadinitrd; then bootz ${loadaddr} ${rdaddr}:${filesize} ${fdtaddr}; " \
+				"else bootz ${loadaddr} - ${fdtaddr}; fi;" \
 			"fi;" \
 		"fi;\0" \
 	"loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile};\0" \
