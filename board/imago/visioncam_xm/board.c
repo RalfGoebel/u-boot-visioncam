@@ -281,8 +281,6 @@ int get_voltrail_opp(int rail_offset)
 
 
 #ifdef CONFIG_SPL_BUILD
-/* No env to setup for SPL */
-static inline void setup_board_eeprom_env(void) { }
 
 
 #define GPIO_SD_SUPPLY	((3-1)*32 + 1)	// gpio3_1
@@ -290,17 +288,21 @@ static inline void setup_board_eeprom_env(void) { }
 /* Override function to read eeprom information */
 void do_board_detect(void)
 {
-//	int rc;
+	int rc;
 	u8 reg;
 
 	i2c_set_bus_num(0);
 
-//	i2c_probe(TPS65903X_CHIP_P1);
-
-/*	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
-				  CONFIG_EEPROM_CHIP_ADDRESS);
-	if (rc)
-		printf("ti_i2c_eeprom_init failed %d\n", rc);*/
+	// check if UART should be turned off
+	rc = i2c_read(CONFIG_EEPROM_CHIP_ADDRESS, 128, 2, &reg, 1);
+	if (rc == 0 && reg == 'u')
+	{
+		struct pad_conf_entry disable_uart[] = {
+			{UART2_CTSN, (M15 | PIN_INPUT_PULLUP)},
+			{UART2_RTSN, (M15 | PIN_INPUT_PULLUP)},
+		};
+		do_set_mux32(dra7xx_ctrl.control_padconf_core_base, disable_uart, ARRAY_SIZE(disable_uart));
+	}
 
 	// Workaround fuer Warmstart-Probleme mit der SD-Karte, welche ohne ein
 	// Power-Off nicht mehr in den UHS Modus schaltet.
@@ -473,7 +475,6 @@ int board_phy_config(struct phy_device *phydev)
 	return 0;
 }
 
-#endif
 
 int board_late_init(void)
 {
@@ -498,16 +499,16 @@ int board_late_init(void)
 	printf("gpu: %u mv => %u mv\n", (*omap_vcores)->gpu.value, optimize_vcore_voltage(&(*omap_vcores)->gpu));
 	printf("iva: %u mv => %u mv\n", (*omap_vcores)->iva.value, optimize_vcore_voltage(&(*omap_vcores)->iva));*/
 
-#if !defined(CONFIG_SPL_BUILD)
 	// MAC address: always use efuse, ignore environment variable 'ethaddr'
 	board_set_ethaddr();
 	fixup_rtc();
-#endif
 
 	altera_power_on();
 	
 	return 0;
 }
+
+#endif
 
 void set_muxconf_regs(void)
 {
